@@ -10,6 +10,13 @@ router.get('/',async (req,res)=>{
     res.send(result); 
 })
 
+router.get('/search',async (req,res)=>{
+    let user = await User.findOne({email:req.body.email});
+    if(!user) return res.send("User not found").status(404)
+    res.send(user); 
+})
+
+
 router.post('/',async(req,res)=>{
     const {error} = validateUser(req.body);
     if(error) return res.status(400).send(error.details[0].message);
