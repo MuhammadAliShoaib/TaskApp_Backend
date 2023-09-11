@@ -11,7 +11,7 @@ router.get('/',async (req,res)=>{
 })
 
 router.get('/search',async (req,res)=>{
-    let user = await User.findOne({email:req.body.email}).select('-password');
+    let user = await User.findOne({email:req.query.email}).select('-password');
     if(!user) return res.send("User not found").status(404)
     res.send(user); 
 })
