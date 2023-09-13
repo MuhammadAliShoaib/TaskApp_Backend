@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { Project, validateProject } = require("../model/project");
 const { User } = require("../model/user");
+const { default: mongoose } = require("mongoose");
 
 
 router.get("/", async (req, res) => {
@@ -13,21 +14,20 @@ router.post("/", async (req, res) => {
     const { error } = validateProject(req.body);
     if (error) return res.status(400).send(error.details[0].message)
 
-    const teamMembers = req.body.members;
-    const registeredTeamMembers = await Promise.all(
-        teamMembers.map(async (member) => {
-            const user = await User.findById(member.userId);
+    const teamMembers = await Promise.all(
+        req.body.members.map(async (memberID) => {
+            const user = await User.findById(memberID._id);
             if (!user) {
                 return res.status(400).send("Invalid user")
             } else {
-                return {_id:member.userId,name:member.name,email:member.email};
+                return new mongoose.Types.ObjectId(memberID._id)
             }
         })
     );
 
     let project = new Project({
         taskName: req.body.taskName,
-        members: registeredTeamMembers,
+        members: teamMembers,
         date: req.body.date,
         startTime: req.body.startTime,
         endTime: req.body.endTime,
