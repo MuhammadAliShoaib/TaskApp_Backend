@@ -1,21 +1,8 @@
 const mongoose = require("mongoose")
 const Joi = require("joi")
 const JoiObjectId = require("joi-objectid")(Joi);
+const {User}  = require("../model/user")
 
-
-const memberSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        minLength: 3,
-        maxLength: 25
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    }
-})
 
 const projectSchema = new mongoose.Schema({
     taskName: {
@@ -24,25 +11,10 @@ const projectSchema = new mongoose.Schema({
         minLength: 5,
         maxLength: 25
     },
-    // members: {
-    //     type: [new mongoose.Schema({
-    //         name: {
-    //             type: String,
-    //             required: true,
-    //             minLength: 3,
-    //             maxLength: 25
-    //         },
-    //         email: {
-    //             type: String,
-    //             required: true,
-    //             unique: true
-    //         }
-    //     })]
-    // },
     members: [
         {
-            type: mongoose.Types.ObjectId,
-            ref: "Member"
+            type: mongoose.Schema.Types.ObjectId,
+            ref: User
         }
     ],
     date: {
@@ -64,7 +36,6 @@ const projectSchema = new mongoose.Schema({
     }
 })
 
-const Member = mongoose.model("Member", memberSchema)
 const Project = mongoose.model("project", projectSchema);
 
 const validateProject = (project) => {
