@@ -1,10 +1,16 @@
 const mongoose = require("mongoose")
 const Joi = require("joi")
 const JoiObjectId = require("joi-objectid")(Joi);
-const {User}  = require("../model/user")
+const { User } = require("../model/user")
+
+
 
 
 const projectSchema = new mongoose.Schema({
+    userID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: User
+    },
     taskName: {
         type: String,
         required: true,
@@ -17,7 +23,11 @@ const projectSchema = new mongoose.Schema({
             ref: User
         }
     ],
-    date: {
+    startDate: {
+        type: Date,
+        required: true
+    },
+    endDate: {
         type: Date,
         required: true
     },
@@ -29,10 +39,29 @@ const projectSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    subTasks: [{
+        type: new mongoose.Schema({
+            subTaskName: {
+                type: String,
+                required: true
+            },
+            subTaskStatus: {
+                type: String,
+                default: "Incomplete",
+                enum: ["Complete", "Incomplete"]
+            }
+        })
+    }
+    ],
     board: {
         type: String,
         enum: ["Urgent", "Running", "Ongoing"],
         default: "Running"
+    },
+    projectStatus: {
+        type: String,
+        required:true,
+        enum: ["Complete", "In Progress", "To Do"]
     }
 })
 
@@ -40,16 +69,25 @@ const Project = mongoose.model("project", projectSchema);
 
 const validateProject = (project) => {
     const schema = Joi.object({
+        userID: JoiObjectId().required(),
         taskName: Joi.string().min(5).max(25).required(),
         members: Joi.array().items(
             Joi.object({
                 _id: JoiObjectId().required(),
             })
         ).min(1),
-        date: Joi.date().required(),
+        startDate: Joi.date().required(),
+        endDate: Joi.date().required(),
         startTime: Joi.date().required(),
         endTime: Joi.date().required(),
-        board: Joi.string().required()
+        subTasks: Joi.array().items(
+            Joi.object({
+                subTaskName: Joi.string().required(),
+                subTaskStatus: Joi.string().required(),
+            })
+        ).min(1),
+        board: Joi.string().required(),
+        projectStatus: Joi.string().required(),
     })
 
     return schema.validate(project)
